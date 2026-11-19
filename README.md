@@ -46,6 +46,17 @@ npm start
 ## Deployment
 The site is deployed on Vercel from the `main` branch of this repository. Pushes to `main` build production; other branches get preview deployments.
 
+## Project structure
+- `app/` — routes: `/`, `/scriptures`, `/scriptures/[slug]`, `/darshanas`, `/darshanas/[slug]`, `/learn`, `/about`, plus `sitemap.xml` and `robots.txt`.
+- `components/` — shared UI (header, search dialog, footer, page header, explore grid, lesson preview).
+- `lib/content/` — typed, static content (`scriptures.ts`, `darshanas.ts`, `verses.ts`) and the search index. This layer is the seam for a future database: swap these modules for queries without changing the UI.
+
+## Content rules
+- No verse is added without a source (`SourceRef`). Never invent Sanskrit, chapter or verse references.
+- Translations are added only with a named translator and a public-domain or licensed text. Until then the status is `under-review` and the UI shows "Content under review".
+- Shruti, Smriti, Itihasa, Purana and philosophical literature are kept distinct (`classification`).
+- Disputed or unverified facts (dates, counts) are omitted or flagged, never guessed.
+
 ## Product architecture direction
 This is a front-end prototype. It intentionally uses sample/static content and does not yet include accounts, a CMS, a database, verse-source licensing, or progress persistence. A future shared backend (e.g. Supabase/PostgreSQL) can power both this Next.js website and a React Native + Expo mobile app.
 
