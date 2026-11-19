@@ -13,6 +13,7 @@ const MAX_DAYS = 800;
 const MAX_BOOKMARKS = 500;
 
 import type { Bookmark, BookmarkKind, LearningState, LessonProgress, RecentItem } from './store-types';
+import type { OpBody } from './ops';
 export type { Bookmark, BookmarkKind, LearningState, LessonProgress, RecentItem };
 
 const KINDS: BookmarkKind[] = ['verse', 'chapter', 'scripture', 'lesson', 'darshana'];
@@ -126,6 +127,11 @@ function ensureLoaded() {
 
 function emit() { listeners.forEach((l) => l()); }
 
+/* ---------- operation feed: lets the (optional) account sync mirror local changes ---------- */
+const opListeners = new Set<(op: OpBody) => void>();
+export function subscribeOps(fn: (op: OpBody) => void) { opListeners.add(fn); return () => { opListeners.delete(fn); }; }
+const emitOp = (op: OpBody) => { for (const l of opListeners) { try { l(op); } catch { /* a sync problem must never break learning */ } } };
+
 /**
  * Re-read storage right before a mutation so each action applies onto the latest saved state.
  * Without this, a page that missed a storage event (e.g. restored from the back/forward cache)
@@ -169,11 +175,21 @@ const withDay = (s: LearningState): LearningState => {
   const t = localDate();
   return s.days.includes(t) ? s : { ...s, days: [...s.days, t].sort().slice(-MAX_DAYS) };
 };
+/** Emits a study-day operation when an action newly marks today as studied. */
+const emitDayIfNew = (before: LearningState, after: LearningState) => {
+  const day = after.days.find((d) => !before.days.includes(d));
+  if (day) emitOp({ t: 'day', day });
+};
 
 export function completeLesson(id: string) {
   fresh();
   const prev = current.lessons[id] ?? {};
-  commit(withDay({ ...current, lessons: { ...current.lessons, [id]: { ...prev, completedAt: Date.now() } } }));
+  const before = current;
+  const at = Date.now();
+  // Keep the EARLIEST completion time, exactly as merge and the account do.
+  commit(withDay({ ...current, lessons: { ...current.lessons, [id]: { ...prev, completedAt: prev.completedAt ?? at } } }));
+  emitOp({ t: 'complete', id, at });
+  emitDayIfNew(before, current);
 }
 export function uncompleteLesson(id: string) {
   fresh();
@@ -183,22 +199,29 @@ export function uncompleteLesson(id: string) {
   const lessons = { ...current.lessons };
   if (rest.quiz) lessons[id] = rest; else delete lessons[id];
   commit({ ...current, lessons });
+  emitOp({ t: 'uncomplete', id });
 }
 export function recordQuiz(id: string, score: number, total: number) {
   fresh();
   const prev = current.lessons[id] ?? {};
   const best = Math.max(prev.quiz?.best ?? 0, score);
-  commit(withDay({ ...current, lessons: { ...current.lessons, [id]: { ...prev, quiz: { best, total, last: score, at: Date.now() } } } }));
+  const before = current;
+  const at = Date.now();
+  commit(withDay({ ...current, lessons: { ...current.lessons, [id]: { ...prev, quiz: { best, total, last: score, at } } } }));
+  emitOp({ t: 'quiz', id, best, total, last: score, at });
+  emitDayIfNew(before, current);
 }
 export function toggleBookmark(b: Omit<Bookmark, 'addedAt'>) {
   fresh();
   const exists = current.bookmarks.some((x) => x.id === b.id && x.kind === b.kind);
+  const added: Bookmark = { ...b, addedAt: Date.now() };
   commit({
     ...current,
     bookmarks: exists
       ? current.bookmarks.filter((x) => !(x.id === b.id && x.kind === b.kind))
-      : [{ ...b, addedAt: Date.now() }, ...current.bookmarks].slice(0, MAX_BOOKMARKS),
+      : [added, ...current.bookmarks].slice(0, MAX_BOOKMARKS),
   });
+  emitOp(exists ? { t: 'bm-', kind: b.kind, id: b.id } : { t: 'bm+', b: added });
 }
 export function recordView(item: Omit<RecentItem, 'at'>) {
   fresh();
@@ -211,6 +234,10 @@ export function setDaily(date: string, id: string) {
   if (current.daily?.date === date) return;
   commit({ ...current, daily: { date, id } });
 }
+/** Replaces the local state with `next` (validated). Used by account sync; emits NO operations. */
+export function replaceState(next: LearningState) { fresh(); commit(sanitize(next)); }
+export function getState(): LearningState { ensureLoaded(); return current; }
+
 export function exportData(): string { fresh(); return JSON.stringify({ app: 'dharmaquest', exportedAt: new Date().toISOString(), data: current }, null, 2); }
 export function importData(text: string): { ok: boolean; error?: string } {
   try {

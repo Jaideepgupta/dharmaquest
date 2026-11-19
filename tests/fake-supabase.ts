@@ -14,7 +14,7 @@ export class FakeDb {
   tables: Record<string, Row[]> = {};
   log: { table: string; op: string; rows: Row[] }[] = [];
   /** Make the next `times` operations of this kind fail, to test error handling and retries. */
-  fail: { table: string; op: string; message: string; times: number } | null = null;
+  fail: { table: string; op: string; message: string; times: number; status?: number; code?: string; throws?: boolean } | null = null;
   constructor(public currentUser: string) {}
 
   seed(table: string, rows: Row[]) { this.tables[table] = [...(this.tables[table] ?? []), ...rows.map((r) => ({ ...r }))]; }
@@ -23,6 +23,12 @@ export class FakeDb {
 
   private check(table: string, op: string): string | null {
     if (this.fail && this.fail.table === table && this.fail.op === op && this.fail.times > 0) { this.fail.times -= 1; return this.fail.message; }
+    return null;
+  }
+  /** Shape of an injected failure, so tests can simulate network errors, expired sessions and rejections. */
+  failure(table: string, op: string): { message: string; status?: number; code?: string; throws?: boolean } | null {
+    const f = this.fail;
+    if (f && f.table === table && f.op === op && f.times > 0) { f.times -= 1; return f; }
     return null;
   }
   private visible(table: string): Row[] { return USER_TABLES.has(table) ? this.rows(table).filter((r) => r.user_id === this.currentUser) : this.rows(table); }
@@ -50,11 +56,13 @@ export class FakeDb {
       constructor(private table: string, private kind: 'select' | 'delete', private cols = '*') {}
       eq(c: string, v: unknown) { this.preds.push((r) => r[c] === v); return this; }
       in(c: string, vs: unknown[]) { this.preds.push((r) => vs.includes(r[c])); return this; }
-      then<A, B>(ok?: ((v: { data: Row[] | null; error: { message: string } | null }) => A | PromiseLike<A>) | null, bad?: ((e: unknown) => B | PromiseLike<B>) | null) {
+      then<A, B>(ok?: ((v: { data: Row[] | null; error: { message: string; code?: string } | null; status?: number }) => A | PromiseLike<A>) | null, bad?: ((e: unknown) => B | PromiseLike<B>) | null) {
+        const f = db.failure(this.table, this.kind);
+        if (f?.throws) return Promise.reject(new TypeError(f.message)).then(ok, bad);
+        if (f) return Promise.resolve({ data: null, error: { message: f.message, code: f.code }, status: f.status }).then(ok, bad);
         return Promise.resolve(this.run()).then(ok, bad);
       }
       private run(): { data: Row[] | null; error: { message: string } | null } {
-        const err = db.check(this.table, this.kind); if (err) return { data: null, error: { message: err } };
         const match = (r: Row) => this.preds.every((p) => p(r));
         if (this.kind === 'delete') {
           const gone = db.visible(this.table).filter(match);
@@ -68,8 +76,7 @@ export class FakeDb {
     }
     const write = (table: string, op: 'upsert' | 'insert', rows: Row[], onConflict?: string): DbResult<unknown> => {
       const run = () => {
-        const err = db.check(table, op); if (err) return { data: null, error: { message: err } };
-        for (const r of rows) { const v = db.validate(table, r); if (v) return { data: null, error: { message: v } }; }
+        for (const r of rows) { const v = db.validate(table, r); if (v) return { data: null, error: { message: v }, status: 400 }; }
         const next = db.rows(table).map((r) => ({ ...r }));
         for (const r of rows) {
           if (op === 'upsert') {
@@ -77,16 +84,21 @@ export class FakeDb {
             const hit = next.find((x) => keys.length && keys.every((k) => x[k] === r[k]));
             if (hit) { Object.assign(hit, r); continue; }
           } else if (table === 'bookmarks') {
-            if (next.filter((x) => x.user_id === r.user_id).length >= 500) return { data: null, error: { message: 'bookmark limit reached (500)' } };
+            if (next.filter((x) => x.user_id === r.user_id).length >= 500) return { data: null, error: { message: 'bookmark limit reached (500)' }, status: 400 };
             const col = TARGETS.find((c) => r[c] != null)!;
-            if (next.some((x) => x.user_id === r.user_id && x[col] === r[col])) return { data: null, error: { message: `duplicate key value violates unique constraint "bookmarks_user_${col}_uidx"` } };
+            if (next.some((x) => x.user_id === r.user_id && x[col] === r[col])) return { data: null, error: { message: `duplicate key value violates unique constraint "bookmarks_user_${col}_uidx"` }, status: 409 };
           }
           next.push({ ...r });
         }
         db.tables[table] = next; db.log.push({ table, op, rows });
         return { data: null, error: null };
       };
-      return { then: (ok, bad) => Promise.resolve(run()).then(ok, bad) } as DbResult<unknown>;
+      return { then: (ok, bad) => {
+        const f = db.failure(table, op);
+        if (f?.throws) return Promise.reject(new TypeError(f.message)).then(ok, bad);
+        if (f) return Promise.resolve({ data: null, error: { message: f.message, code: f.code }, status: f.status }).then(ok, bad);
+        return Promise.resolve(run()).then(ok, bad);
+      } } as DbResult<unknown>;
     };
     return {
       from(table: string): TableApi {

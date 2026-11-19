@@ -3,30 +3,7 @@ import assert from 'node:assert/strict';
 import { RepositoryError, SupabaseLearningRepository, syncOnSignIn } from '../lib/learning/repository';
 import type { LearningState } from '../lib/learning/store-types';
 import { FakeDb } from './fake-supabase';
-
-const ME = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-const OTHER = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
-const uid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
-
-function world(user = ME) {
-  const db = new FakeDb(user);
-  db.seed('lessons', ['gita-overview', 'gita-ch1', 'gita-ch2', 'verse-2-47', 'darshana-samkhya', 'ramayana'].map((slug, i) => ({ id: uid(100 + i), slug, title: `Title of ${slug}` })));
-  db.seed('scripture_categories', ['bhagavad-gita', 'other-gitas', 'ramayana', 'mahabharata', 'upanishads', 'vedas'].map((slug, i) => ({ id: uid(200 + i), slug, title: `Cat ${slug}` })));
-  const cat = (s: string) => uid(200 + ['bhagavad-gita', 'other-gitas', 'ramayana', 'mahabharata', 'upanishads', 'vedas'].indexOf(s));
-  db.seed('scriptures', [
-    { id: uid(300), slug: 'bhagavad-gita', title: 'Bhagavad Gita', category_id: cat('bhagavad-gita') },
-    { id: uid(301), slug: 'ashtavakra-gita', title: 'Ashtavakra Gita', category_id: cat('other-gitas') },
-    { id: uid(302), slug: 'ramayana', title: 'Ramayana', category_id: cat('ramayana') },
-    { id: uid(303), slug: 'isha-upanishad', title: 'Isha Upanishad', category_id: cat('upanishads') }, // catalogue-only: no page
-  ]);
-  db.seed('darshanas', [{ id: uid(400), slug: 'samkhya', name: 'Samkhya' }]);
-  db.seed('chapters', [1, 2, 3].map((n) => ({ id: uid(500 + n), scripture_id: uid(300), number: n, unit_kind: 'chapter', english_title: `Title ${n}` })));
-  db.seed('verses', [{ id: uid(600), scripture_id: uid(300), label: '2.47' }]);
-  const repo = new SupabaseLearningRepository(db.client(), user);
-  return { db, repo };
-}
-const empty = (): LearningState => ({ version: 1, lessons: {}, bookmarks: [], recent: [], days: [] });
-const bm = (kind: LearningState['bookmarks'][number]['kind'], id: string, addedAt = 1000) => ({ kind, id, title: `T ${id}`, href: '/x', addedAt });
+import { world, ME, OTHER, uid, empty, bm } from './helpers';
 
 test('constructor rejects a user id that is not a UUID', () => {
   assert.throws(() => new SupabaseLearningRepository(new FakeDb(ME).client(), "x'; drop table users; --"), /UUID/);
@@ -139,15 +116,15 @@ test('read errors are not swallowed', async () => {
   await assert.rejects(repo.load(), (e: unknown) => e instanceof RepositoryError && /permission denied/.test((e as Error).message));
 });
 
-test('operations: complete keeps the EARLIEST time; uncomplete keeps the quiz; recordQuiz adds a study day', async () => {
+test('operations: complete keeps the EARLIEST time; uncomplete keeps the quiz; recordQuiz does not invent study days', async () => {
   const { db, repo } = world();
   await repo.completeLesson('gita-ch1', 5000);
   await repo.completeLesson('gita-ch1', 9000);
   assert.equal((await repo.load()).lessons['gita-ch1'].completedAt, 5000, 'a later completion does not overwrite');
   await repo.completeLesson('gita-ch1', 1000);
   assert.equal((await repo.load()).lessons['gita-ch1'].completedAt, 1000, 'an earlier one does');
-  await repo.recordQuiz('gita-ch1', 3, 4, 3, Date.parse('2026-03-06T08:00:00Z'));
-  assert.ok(db.mine('user_study_days').some((r) => r.day === '2026-03-06'), 'a quiz counts as a study day');
+  await repo.recordQuiz('gita-ch1', 3, 4, 3, Date.parse('2026-03-06T23:30:00Z'));
+  assert.equal(db.mine('user_study_days').length, 0, 'recording a quiz must NOT invent a study day from the UTC date (the local day is sent explicitly)');
   await repo.uncompleteLesson('gita-ch1');
   const after = (await repo.load()).lessons['gita-ch1'];
   assert.equal(after.completedAt, undefined, 'completion removed');

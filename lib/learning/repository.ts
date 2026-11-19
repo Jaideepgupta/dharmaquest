@@ -17,7 +17,8 @@ import { applyLimits, mergeStates } from './merge';
 import type { Bookmark, BookmarkKind, LearningState, LessonProgress } from './store-types';
 
 /* ---------- minimal client surface (structurally compatible with supabase-js) ---------- */
-export type DbResult<T> = PromiseLike<{ data: T | null; error: { message: string } | null }>;
+export type DbError = { message: string; code?: string };
+export type DbResult<T> = PromiseLike<{ data: T | null; error: DbError | null; status?: number }>;
 export interface FilterApi extends DbResult<Record<string, unknown>[]> {
   eq(column: string, value: unknown): FilterApi;
   in(column: string, values: unknown[]): FilterApi;
@@ -30,8 +31,22 @@ export interface TableApi {
 }
 export interface SupabaseLike { from(table: string): TableApi }
 
+/**
+ * How the sync engine should react to a failed call:
+ *  - transient: network trouble, timeouts, rate limits, 5xx. Keep the work queued and retry later.
+ *  - auth: the session is missing or expired. Pause and refresh the session before retrying.
+ *  - permanent: the database rejected this exact request (bad data, forbidden). Retrying can never help.
+ */
+export type ErrorKind = 'transient' | 'auth' | 'permanent';
+
+export function classifyDbError(error: DbError, status?: number): ErrorKind {
+  if (status === 401 || error.code === 'PGRST301' || error.code === 'PGRST303' || /jwt (is )?expired|invalid jwt/i.test(error.message)) return 'auth';
+  if (status === undefined || status === 0 || status === 408 || status === 429 || status >= 500) return 'transient';
+  return 'permanent';
+}
+
 export class RepositoryError extends Error {
-  constructor(public readonly table: string, message: string) {
+  constructor(public readonly table: string, message: string, public readonly kind: ErrorKind = 'permanent') {
     super(`${table}: ${message}`);
     this.name = 'RepositoryError';
   }
@@ -58,9 +73,15 @@ export interface SaveResult {
 }
 
 async function run<T>(table: string, q: DbResult<T>): Promise<T | null> {
-  const { data, error } = await q;
-  if (error) throw new RepositoryError(table, error.message);
-  return data;
+  let res: Awaited<typeof q>;
+  try {
+    res = await q;
+  } catch (e) {
+    // The call itself threw (e.g. the network is down): that is transient by definition.
+    throw new RepositoryError(table, e instanceof Error ? e.message : 'request failed', 'transient');
+  }
+  if (res.error) throw new RepositoryError(table, res.error.message, classifyDbError(res.error, res.status));
+  return res.data;
 }
 const rows = async (table: string, q: FilterApi) => ((await run(table, q)) ?? []) as Record<string, unknown>[];
 const iso = (ms?: number) => (ms === undefined ? null : new Date(ms).toISOString());
@@ -244,7 +265,8 @@ export class SupabaseLearningRepository implements LearningRepository {
     const ix = await this.loadIndex(); const id = ix.lessons.get(lessonId);
     if (!id) throw new RepositoryError('lessons', `unknown lesson ${lessonId}`);
     await run('user_progress', this.db.from('user_progress').upsert([{ user_id: this.userId, lesson_id: id, quiz_best: best, quiz_total: total, quiz_last: last, quiz_at: iso(at) }], { onConflict: 'user_id,lesson_id' }));
-    await this.addStudyDay(new Date(at).toISOString().slice(0, 10));
+    // Study days are NOT derived here: they are recorded by explicit addStudyDay() calls using the learner's LOCAL date.
+    // (Deriving a UTC date from `at` would mark the wrong day for anyone not in UTC.)
   }
   async addBookmark(b: Bookmark): Promise<boolean> {
     const t = await this.target(b);
