@@ -35,7 +35,7 @@ select t.assert((select count(*) from public.search_content('_')) = 0, '"_" is t
 select t.assert((select count(*) from public.search_content('\')) = 0, 'a backslash is handled');
 select t.assert((select count(*) from public.search_content('')) = 0 and (select count(*) from public.search_content('   ')) = 0, 'empty and blank queries return nothing');
 select t.assert((select count(*) from public.search_content($$'; drop table public.verses; --$$)) = 0, 'SQL-injection style input returns nothing');
-select t.assert((select count(*) from public.verses) = 1, '...and the verses table is intact');
+select t.assert((select count(*) from public.verses) = (select count(*) from public.verses where source_id is not null) and (select count(*) from public.verses) >= 1, '...and the verses table is intact (still present, every row still sourced)');
 select t.assert((select count(*) from public.search_content(repeat('x', 100000))) = 0, 'a very long query is handled');
 select t.assert((select count(*) from public.search_content(null)) = 0, 'a NULL query returns nothing');
 

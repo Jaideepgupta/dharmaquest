@@ -237,5 +237,5 @@ protocol as we understand it; it is **not** proof of compatibility with real Sup
 * **After a merge, `quiz_last`** means "last score of the attempt that produced the best result", not necessarily the
   most recent attempt. The dashboard shows only the best score.
 * **Known thin content:** the Dvaitadvaita / sources comparison cell ("Shruti is primary.") is tracked in a test and
-  needs a sourced expansion. The Hindi and English translations of 2.47 are intentionally absent.
+  needs a sourced expansion. Hindi and English translations are intentionally absent for every verse study until a named, public-domain or licensed translator is added. Gita 18.66 is deliberately not included: two public copies differ in the words (`त्वा` vs `त्वां`), so it stays "under review" until an edition is chosen.
 * The migrations were edited in place during development because they had never been applied anywhere.
