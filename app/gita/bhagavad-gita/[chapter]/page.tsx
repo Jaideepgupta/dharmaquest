@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import BookmarkButton from '@/components/BookmarkButton';
+import RecentTracker from '@/components/RecentTracker';
 import PageHeader from '@/components/PageHeader';
 import { bhagavadGitaChapters, getChapter, getVerseStudy } from '@/lib/content/gita';
 
@@ -26,8 +28,11 @@ export default function ChapterPage({ params }: Props) {
 
   return (
     <>
+      <RecentTracker href={`/gita/bhagavad-gita/${c.number}`} title={`Bhagavad Gita chapter ${c.number}: ${c.englishTitle}`} kind="Chapter" />
       <PageHeader crumbs={[{ label: 'Gita Library', href: '/gita' }, { label: 'Bhagavad Gita', href: '/gita/bhagavad-gita' }, { label: `Chapter ${c.number}` }]}
-        kicker={`CHAPTER ${c.number} OF 18 · ${c.verseCount} VERSES`} title={c.englishTitle} sanskrit={c.sanskritName} lede={c.name} />
+        kicker={`CHAPTER ${c.number} OF 18 · ${c.verseCount} VERSES`} title={c.englishTitle} sanskrit={c.sanskritName} lede={c.name}>
+        <div className="page-badges"><BookmarkButton id={`bg-${c.number}`} kind="chapter" title={`Bhagavad Gita chapter ${c.number}: ${c.englishTitle}`} href={`/gita/bhagavad-gita/${c.number}`} /> <Link href={`/learn/lessons/gita-ch${c.number}`} className="chip">Lesson and quiz</Link></div>
+      </PageHeader>
       <section className="section tight">
         <div className="container detail-grid">
           <div className="prose">

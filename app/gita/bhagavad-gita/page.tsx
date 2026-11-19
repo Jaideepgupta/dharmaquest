@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import BookmarkButton from '@/components/BookmarkButton';
+import RecentTracker from '@/components/RecentTracker';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import GitaDetail from '@/components/GitaDetail';
@@ -13,8 +15,9 @@ export const metadata: Metadata = { title: 'Bhagavad Gita', description: g.intro
 export default function BhagavadGita() {
   return (
     <>
+      <RecentTracker href="/gita/bhagavad-gita" title="Bhagavad Gita" kind="Gita" />
       <PageHeader crumbs={[{ label: 'Gita Library', href: '/gita' }, { label: 'Bhagavad Gita' }]} kicker="SMRITI · ITIHASA" title={g.name} sanskrit={g.sanskrit} lede={g.tagline}>
-        <div className="page-badges"><StatusBadge status="published" /> <span className="note-small" style={{ margin: 0 }}>Chapter guides are published. Verse-level study is available for verse 2.47, with more verses to follow as sources are verified.</span></div>
+        <div className="page-badges"><StatusBadge status="published" /> <BookmarkButton id="bhagavad-gita" kind="scripture" title="Bhagavad Gita" href="/gita/bhagavad-gita" /> <span className="note-small" style={{ margin: 0 }}>Chapter guides are published. Verse-level study is available for verse 2.47, with more verses to follow as sources are verified.</span></div>
         <div className="hero-buttons" style={{ marginTop: 22 }}>
           <Link href="/gita/bhagavad-gita/1" className="button button-primary">Start learning <ArrowRight size={16} aria-hidden="true" /></Link>
           <Link href="/gita/bhagavad-gita/2/47" className="button button-outline">Read verse 2.47</Link>

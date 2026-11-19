@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import BookmarkButton from '@/components/BookmarkButton';
+import RecentTracker from '@/components/RecentTracker';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import { darshanas, getDarshana, vedantaSchools } from '@/lib/content/darshanas';
@@ -31,7 +33,9 @@ export default function DarshanaPage({ params }: Props) {
 
   return (
     <>
+      <RecentTracker href={`/darshanas/${d.slug}`} title={`${d.name} Darshana`} kind="Darshana" />
       <PageHeader crumbs={[{ label: 'Darshanas', href: '/darshanas' }, { label: d.name }]} kicker={`DARSHANA ${d.number} OF 06`} title={d.name} sanskrit={d.sanskrit} lede={d.focus}>
+        <div className="page-badges"><BookmarkButton id={d.slug} kind="darshana" title={`${d.name} Darshana`} href={`/darshanas/${d.slug}`} /> <Link href={`/learn/lessons/darshana-${d.slug}`} className="chip">Lesson and quiz</Link></div>
         <blockquote className="core-q"><span>Core question</span>{d.coreQuestion}</blockquote>
       </PageHeader>
 

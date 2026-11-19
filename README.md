@@ -47,9 +47,17 @@ npm start
 The site is deployed on Vercel from the `main` branch of this repository. Pushes to `main` build production; other branches get preview deployments.
 
 ## Project structure
-- `app/` — routes: `/`, `/scriptures`, `/scriptures/[slug]`, `/gita`, `/gita/[slug]`, `/gita/bhagavad-gita`, `/gita/bhagavad-gita/[chapter]`, `/gita/bhagavad-gita/[chapter]/[verse]`, `/darshanas`, `/darshanas/[slug]`, `/darshanas/compare`, `/learn`, `/about`, plus `sitemap.xml` and `robots.txt`.
+- `app/` — routes: `/`, `/scriptures`, `/scriptures/[slug]`, `/gita`, `/gita/[slug]`, `/gita/bhagavad-gita`, `/gita/bhagavad-gita/[chapter]`, `/gita/bhagavad-gita/[chapter]/[verse]`, `/darshanas`, `/darshanas/[slug]`, `/darshanas/compare`, `/learn`, `/learn/lessons`, `/learn/lessons/[id]`, `/progress`, `/about`, plus `sitemap.xml` and `robots.txt`.
 - `components/` — shared UI (header, search dialog, footer, page header, explore grid, lesson preview).
 - `lib/content/` — typed, static content (`scriptures.ts`, `darshanas.ts`, `verses.ts`, `gita.ts`) and the search index. `comparison.ts` holds the Darshana and Vedanta sub-school comparison data (one source for the compare page and each school page). `gita.ts` holds the Gita catalogue, the 18 Bhagavad Gita chapter guides and verse study records. This layer is the seam for a future database: swap these modules for queries without changing the UI.
+
+## Learning features (Phase 4) and local storage
+Lessons, quizzes, bookmarks, recently viewed pages and the study streak are stored **only in the visitor's browser** (`localStorage`, key `dq-progress-v1`). Nothing is sent to a server. There are no accounts yet.
+- `lib/learning/store.ts` is the only place that touches storage. It validates everything it reads or imports (`sanitize`), re-reads storage before each write so a stale tab cannot overwrite newer data, and falls back to in-memory state with a visible warning if storage is blocked. UI components use the `useLearning()` hook.
+- A streak counts consecutive local calendar days with real activity (a completed lesson or a finished quiz). There are no badges or invented statistics.
+- Visitors can export, import and clear their data on `/progress`.
+- Lessons are generated from the verified content layer (`lib/learning/lessons.ts`); quizzes are hand-written in `lib/learning/quizzes.ts`. Every quiz question must be answerable from content already on the site and must carry an explanation.
+- Phase 5 swaps the persistence functions in `store.ts` for Supabase-backed ones; the hook and UI stay the same.
 
 ## Adding a verse study page
 Add a `VerseStudy` to `verseStudies` in `lib/content/gita.ts`. A page is generated only for verses listed there. Before adding: verify the Sanskrit against a public-domain text, give every translation a named translator and a public-domain or licensed source, and keep your own summaries labelled as DharmaQuest editorial. Datasets whose code is public domain (e.g. Unlicense) may still contain copyrighted translations: check the translation's own licence before reuse.

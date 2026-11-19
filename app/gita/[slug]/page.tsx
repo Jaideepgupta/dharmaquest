@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import BookmarkButton from '@/components/BookmarkButton';
+import RecentTracker from '@/components/RecentTracker';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import GitaDetail from '@/components/GitaDetail';
@@ -22,8 +24,9 @@ export default function GitaPage({ params }: Props) {
   if (!g || g.slug === 'bhagavad-gita') notFound();
   return (
     <>
+      <RecentTracker href={`/gita/${g.slug}`} title={g.name} kind="Gita" />
       <PageHeader crumbs={[{ label: 'Gita Library', href: '/gita' }, { label: g.name }]} kicker={g.classification.join(' · ').toUpperCase()} title={g.name} sanskrit={g.sanskrit} lede={g.tagline}>
-        <div className="page-badges"><StatusBadge status={g.detailStatus} /></div>
+        <div className="page-badges"><StatusBadge status={g.detailStatus} /> <BookmarkButton id={g.slug} kind="scripture" title={g.name} href={`/gita/${g.slug}`} /></div>
       </PageHeader>
       <GitaDetail g={g}>
         <h2>Chapter list</h2>

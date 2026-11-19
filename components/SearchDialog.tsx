@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { SearchEntry } from '@/lib/content/types';
 import Link from 'next/link';
 import { Search, X, ArrowRight } from 'lucide-react';
-import { buildSearchIndex, searchIndex } from '@/lib/content/search';
+type SearchMod = typeof import('@/lib/content/search');
 
-const KINDS = ['All', 'Scripture', 'Gita', 'Upanishad', 'Darshana', 'Concept', 'Epic', 'Path'] as const;
+const KINDS = ['All', 'Scripture', 'Gita', 'Upanishad', 'Darshana', 'Concept', 'Epic', 'Lesson', 'Path'] as const;
 const SUGGESTIONS = ['Karma', 'Atman', 'Katha', 'Ashtavakra', 'Samkhya', 'Mahavakya'];
 
 export default function SearchDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -13,10 +14,16 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState<(typeof KINDS)[number]>('All');
-  const index = useMemo(() => buildSearchIndex(), []);
+  // The index (all titles, lessons, concepts) is loaded the first time search opens, not with every page.
+  const [mod, setMod] = useState<SearchMod | null>(null);
+  const [index, setIndex] = useState<SearchEntry[]>([]);
+  useEffect(() => {
+    if (!open || mod) return;
+    import('@/lib/content/search').then((m) => { setMod(m); setIndex(m.buildSearchIndex()); });
+  }, [open, mod]);
   const results = useMemo(
-    () => searchIndex(index, query, kind === 'All' ? undefined : kind).slice(0, 30),
-    [index, query, kind],
+    () => (mod ? mod.searchIndex(index, query, kind === 'All' ? undefined : kind).slice(0, 30) : []),
+    [mod, index, query, kind],
   );
 
   useEffect(() => {
@@ -69,7 +76,9 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
         )}
 
         <div className="search-results" aria-live="polite">
-          {results.length === 0 ? (
+          {!mod ? (
+            <p className="search-empty">Loading search…</p>
+          ) : results.length === 0 ? (
             <p className="search-empty">
               No results for “{query}”{kind !== 'All' ? ` in ${kind}` : ''}. Try another word, or clear the filter.
             </p>

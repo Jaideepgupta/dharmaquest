@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
+import BookmarkButton from '@/components/BookmarkButton';
+import RecentTracker from '@/components/RecentTracker';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import { getCategory, scriptureCategories } from '@/lib/content/scriptures';
@@ -26,8 +28,9 @@ export default function ScripturePage({ params }: Props) {
 
   return (
     <>
+      <RecentTracker href={`/scriptures/${c.slug}`} title={c.title} kind="Scripture" />
       <PageHeader crumbs={[{ label: 'Scriptures', href: '/scriptures' }, { label: c.title }]} kicker={c.classification.join(' · ').toUpperCase()} title={c.title} sanskrit={c.sanskrit} lede={c.tagline}>
-        <div className="page-badges"><StatusBadge status={c.detailStatus} /></div>
+        <div className="page-badges"><StatusBadge status={c.detailStatus} /> <BookmarkButton id={c.slug} kind="scripture" title={c.title} href={`/scriptures/${c.slug}`} /></div>
       </PageHeader>
 
       <section className="section tight">

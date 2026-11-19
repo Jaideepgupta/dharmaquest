@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { ArrowRight, BookOpen, Compass, Heart, Play, ScrollText, CircleHelp, Sparkles, Sun, Flower2, Brain, GraduationCap } from 'lucide-react';
 import ExploreGrid from '@/components/ExploreGrid';
 import LessonPreview from '@/components/LessonPreview';
+import ContinueLearning from '@/components/ContinueLearning';
 import { darshanas } from '@/lib/content/darshanas';
+import { lessonMeta } from '@/lib/learning/lessons';
 import { verseOfTheDay as v } from '@/lib/content/verses';
 
 const journey = [
@@ -68,8 +70,9 @@ export default function Home() {
         <div className="container">
           <div className="section-heading">
             <div><div className="section-kicker">CONTINUE LEARNING</div><h2 id="continue-title">A sample journey<br /><em>to begin with.</em></h2></div>
-            <p>Sign-in and progress tracking are not available yet. Here is a suggested route through the library. Once progress tracking is added, this is where your own place will appear.</p>
+            <p>Here is a suggested route through the library. Once you complete a lesson, this section shows your own place instead. Progress is kept privately in this browser.</p>
           </div>
+          <ContinueLearning meta={lessonMeta}>
           <ol className="journey">
             {journey.map((j, i) => (
               <li key={j.label}>
@@ -81,6 +84,7 @@ export default function Home() {
               </li>
             ))}
           </ol>
+          </ContinueLearning>
         </div>
       </section>
 

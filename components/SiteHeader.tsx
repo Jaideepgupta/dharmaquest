@@ -11,7 +11,7 @@ const links = [
   { href: '/gita', label: 'Gita Library' },
   { href: '/darshanas', label: 'Darshanas' },
   { href: '/learn', label: 'Learn' },
-  { href: '/about', label: 'Our approach' },
+  { href: '/progress', label: 'My learning' },
 ];
 
 export default function SiteHeader() {

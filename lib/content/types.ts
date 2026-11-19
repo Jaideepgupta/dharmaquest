@@ -81,7 +81,7 @@ export interface SearchEntry {
   title: string;
   subtitle: string;
   href: string;
-  kind: 'Scripture' | 'Gita' | 'Upanishad' | 'Darshana' | 'Concept' | 'Epic' | 'Path';
+  kind: 'Scripture' | 'Gita' | 'Upanishad' | 'Darshana' | 'Concept' | 'Epic' | 'Path' | 'Lesson';
   keywords: string;
 }
 

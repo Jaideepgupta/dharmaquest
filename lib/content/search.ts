@@ -3,6 +3,7 @@ import { darshanas } from './darshanas';
 import { bhagavadGitaChapters, gitaTexts, verseStudies } from './gita';
 import { categoryHref } from './scriptures';
 import { vedantaComparison, thinkers } from './comparison';
+import { lessons } from '../learning/lessons';
 import type { SearchEntry } from './types';
 
 const concepts: { title: string; subtitle: string; href: string; keywords: string }[] = [
@@ -97,6 +98,11 @@ export function buildSearchIndex(): SearchEntry[] {
     { title: 'Intermediate path', subtitle: 'Connections between texts', href: '/learn#intermediate', kind: 'Path', keywords: 'learn' },
     { title: 'Advanced path', subtitle: 'Study of philosophical traditions', href: '/learn#advanced', kind: 'Path', keywords: 'learn study' },
   );
+
+  for (const l of lessons) {
+    entries.push({ title: l.title, subtitle: `Lesson · ${l.summary}`, href: `/learn/lessons/${l.id}`, kind: 'Lesson', keywords: `${l.collection} ${l.level} quiz lesson` });
+  }
+  entries.push({ title: 'My learning', subtitle: 'Progress, bookmarks and quiz results', href: '/progress', kind: 'Path', keywords: 'progress bookmarks streak dashboard saved' });
 
   return entries;
 }
