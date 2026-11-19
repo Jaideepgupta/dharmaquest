@@ -12,21 +12,8 @@ export const MAX_RECENT = 8;
 const MAX_DAYS = 800;
 const MAX_BOOKMARKS = 500;
 
-export type BookmarkKind = 'verse' | 'chapter' | 'scripture' | 'lesson' | 'darshana';
-
-export interface Bookmark { id: string; kind: BookmarkKind; title: string; href: string; addedAt: number }
-export interface RecentItem { href: string; title: string; kind: string; at: number }
-export interface LessonProgress { completedAt?: number; quiz?: { best: number; total: number; last: number; at: number } }
-
-export interface LearningState {
-  version: 1;
-  lessons: Record<string, LessonProgress>;
-  bookmarks: Bookmark[];
-  recent: RecentItem[];
-  /** Local calendar days (YYYY-MM-DD) with real study activity. */
-  days: string[];
-  daily?: { date: string; id: string };
-}
+import type { Bookmark, BookmarkKind, LearningState, LessonProgress, RecentItem } from './store-types';
+export type { Bookmark, BookmarkKind, LearningState, LessonProgress, RecentItem };
 
 const KINDS: BookmarkKind[] = ['verse', 'chapter', 'scripture', 'lesson', 'darshana'];
 const EMPTY: LearningState = { version: 1, lessons: {}, bookmarks: [], recent: [], days: [] };
@@ -57,6 +44,8 @@ export function computeStreak(days: string[], today = localDate()): number {
 const isStr = (v: unknown, max = 300): v is string => typeof v === 'string' && v.length > 0 && v.length <= max;
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const isDate = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+// Keys that would alter an object's prototype instead of adding an entry.
+const RESERVED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 const safeHref = (v: unknown): v is string => isStr(v, 300) && v.startsWith('/') && !v.startsWith('//');
 
 export function sanitize(raw: unknown): LearningState {
@@ -66,7 +55,7 @@ export function sanitize(raw: unknown): LearningState {
 
   if (r.lessons && typeof r.lessons === 'object') {
     for (const [id, v] of Object.entries(r.lessons as Record<string, unknown>)) {
-      if (!isStr(id, 80) || !v || typeof v !== 'object') continue;
+      if (!isStr(id, 80) || RESERVED_KEYS.has(id) || !v || typeof v !== 'object') continue;
       const p = v as Record<string, unknown>;
       const lp: LessonProgress = {};
       if (isNum(p.completedAt)) lp.completedAt = p.completedAt;

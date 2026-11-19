@@ -59,6 +59,13 @@ Lessons, quizzes, bookmarks, recently viewed pages and the study streak are stor
 - Lessons are generated from the verified content layer (`lib/learning/lessons.ts`); quizzes are hand-written in `lib/learning/quizzes.ts`. Every quiz question must be answerable from content already on the site and must carry an explanation.
 - Phase 5 swaps the persistence functions in `store.ts` for Supabase-backed ones; the hook and UI stay the same.
 
+## Backend (Phase 5): designed and tested, not deployed
+A Supabase/PostgreSQL schema, row-level-security policies, a generated seed, an account repository and sign-in merge
+logic exist and are tested, but **nothing is connected to the website**: no project, no keys, no accounts yet.
+See [`docs/backend.md`](docs/backend.md) for the model, the security design, how to apply it, and a candid list of
+what has not been verified. Commands: `npm test` (TypeScript), `npm run db:test` (needs local PostgreSQL),
+`npm run check` (everything), `npm run db:seed` (regenerate `supabase/seed.sql` after content changes).
+
 ## Adding a verse study page
 Add a `VerseStudy` to `verseStudies` in `lib/content/gita.ts`. A page is generated only for verses listed there. Before adding: verify the Sanskrit against a public-domain text, give every translation a named translator and a public-domain or licensed source, and keep your own summaries labelled as DharmaQuest editorial. Datasets whose code is public domain (e.g. Unlicense) may still contain copyrighted translations: check the translation's own licence before reuse.
 
