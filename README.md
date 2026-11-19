@@ -52,16 +52,16 @@ The site is deployed on Vercel from the `main` branch of this repository. Pushes
 - `lib/content/` — typed, static content (`scriptures.ts`, `darshanas.ts`, `verses.ts`, `gita.ts`) and the search index. `comparison.ts` holds the Darshana and Vedanta sub-school comparison data (one source for the compare page and each school page). `gita.ts` holds the Gita catalogue, the 18 Bhagavad Gita chapter guides and verse study records. This layer is the seam for a future database: swap these modules for queries without changing the UI.
 
 ## Learning features (Phase 4) and local storage
-Lessons, quizzes, bookmarks, recently viewed pages and the study streak are stored **only in the visitor's browser** (`localStorage`, key `dq-progress-v1`). Nothing is sent to a server. There are no accounts yet.
+Lessons, quizzes, bookmarks, recently viewed pages and the study streak are stored **only in the visitor's browser** (`localStorage`, key `dq-progress-v1`). By default nothing is sent to a server. Optional email-magic-link accounts (Phase 5b) can sync it across devices; they are **off** until Supabase is configured (see `docs/backend.md` section 7).
 - `lib/learning/store.ts` is the only place that touches storage. It validates everything it reads or imports (`sanitize`), re-reads storage before each write so a stale tab cannot overwrite newer data, and falls back to in-memory state with a visible warning if storage is blocked. UI components use the `useLearning()` hook.
 - A streak counts consecutive local calendar days with real activity (a completed lesson or a finished quiz). There are no badges or invented statistics.
 - Visitors can export, import and clear their data on `/progress`.
 - Lessons are generated from the verified content layer (`lib/learning/lessons.ts`); quizzes are hand-written in `lib/learning/quizzes.ts`. Every quiz question must be answerable from content already on the site and must carry an explanation.
-- Phase 5 swaps the persistence functions in `store.ts` for Supabase-backed ones; the hook and UI stay the same.
+- With accounts enabled, `lib/learning/sync.ts` and `account-sync.ts` send local changes to Supabase through a persistent queue; the store, hook and UI are unchanged.
 
 ## Backend (Phase 5): designed and tested, not deployed
 A Supabase/PostgreSQL schema, row-level-security policies, a generated seed, an account repository and sign-in merge
-logic exist and are tested, but **nothing is connected to the website**: no project, no keys, no accounts yet.
+logic exist and are tested. Phase 5b adds magic-link sign-in and account sync, **disabled until you create a Supabase project and set the environment variables**; no project or keys exist today.
 See [`docs/backend.md`](docs/backend.md) for the model, the security design, how to apply it, and a candid list of
 what has not been verified. Commands: `npm test` (TypeScript), `npm run db:test` (needs local PostgreSQL),
 `npm run check` (everything), `npm run db:seed` (regenerate `supabase/seed.sql` after content changes).

@@ -166,12 +166,47 @@ After the first release, change the schema only with **new** migrations; do not 
 
 Then make an editor (service role / SQL editor only): `insert into public.editors (user_id) values ('<uuid>');`
 
-## 7. Authentication plan (Phase 5b: not built)
+## 7. Authentication and sync (Phase 5b: built, OFF until you configure it)
 
-Deliberately deferred until you have reviewed this schema. Planned: Supabase Auth with email magic link (no passwords
-to store), `@supabase/ssr` for Next.js cookies, an `/account` page, `syncOnSignIn` on first sign-in, and an account
-deletion route (server-side, service role) that removes the `auth.users` row so the cascade erases the data.
-Providers, email templates and redirect URLs need decisions from you.
+Email **magic link** (no passwords stored). The whole feature is inert unless `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` are set at build time: no header link, no Supabase code loaded, no network calls,
+`/account` explains that accounts are not switched on, `/auth/callback` redirects to `/account`, and the delete
+endpoint answers 501. Production today has none of these set.
+
+### Flow
+1. `/account`: `signInWithOtp({ email, emailRedirectTo: <origin>/auth/callback })` (PKCE; a code-verifier cookie is set in that browser).
+2. The email link lands on `/auth/callback?code=...`; the server exchanges the code for a session (cookies) and
+   redirects to a **safe, same-site path only** (open-redirect proof). Failures show a fixed message by code; nothing
+   from the URL is reflected.
+3. **Same browser only**: opening the link in another browser fails by design (the verifier cookie is not there). The
+   page says so and offers a new link.
+4. First sign-in on a device with local progress: the person is **asked** (add this device's progress, or start from
+   the account). Data from a different account is never merged. After that the account is the source of truth and
+   local changes travel as operations through a persistent, coalescing queue (survives offline and reloads;
+   permanent errors are dropped, transient ones retried, auth errors trigger one refresh).
+5. Sign-out clears the device's progress (so the next person on a shared computer inherits nothing); if unsent
+   changes exist the person must confirm.
+6. **Delete account** (`POST /api/account/delete`): same-origin + JSON only, the person must type `DELETE`, the user id
+   comes from the verified session (never the request body), and the server calls the admin API with
+   `SUPABASE_SERVICE_ROLE_KEY` so database cascades erase all data. The key is server-only; a build-time guard
+   refuses any `NEXT_PUBLIC_*` variable that looks like a secret, and a test pins the files allowed to read it.
+
+### What you must do (I cannot and will not do these)
+1. Create a Supabase project yourself (start with a **new, empty** one) and apply the migrations (section 6).
+2. Dashboard -> Authentication -> URL configuration: set **Site URL** to the production URL and add
+   `https://<your-domain>/auth/callback` (and your preview URL pattern if you want previews) to the **Redirect allow-list**.
+3. **Configure custom SMTP.** Supabase's built-in email service is heavily rate-limited and meant for testing only;
+   magic links will stop arriving under real use without it.
+4. Consider enabling captcha/bot protection on sign-in to limit abuse of the email endpoint.
+5. Set Vercel environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (public by design;
+   safe only because RLS is on) and `SUPABASE_SERVICE_ROLE_KEY` (**secret; server only; never with a NEXT_PUBLIC_ prefix**).
+   Then redeploy (public variables are baked in at build time).
+6. Make the first editor (section 6) only when you are ready to add content.
+
+### Local testing without Supabase
+`npm run dev:fake-supabase` starts a **development-only fake** of the auth and REST endpoints on port 54399 and
+prints the three variables to use. It is how the browser tests run. It proves our code behaves correctly against the
+protocol as we understand it; it is **not** proof of compatibility with real Supabase.
 
 ## 8. Adding sourced content (editors)
 
@@ -189,7 +224,10 @@ Providers, email templates and redirect URLs need decisions from you.
   platform-managed roles, PostgREST behaviour). Apply to a **new, empty** project first.
 * **The repository is tested against a fake**, not the real `supabase-js`. Wire it with a thin cast
   (`client as unknown as SupabaseLike`) and run an end-to-end sign-in test against a real project before relying on it.
-* **No authentication or UI** exists yet, so nothing user-facing changed.
+* **Authentication was tested only against the fake** (58 browser checks, plus unit/property/mutation tests). Run one
+  real sign-in, sync, sign-out and delete against a real Supabase project before enabling it in production.
+* **Magic links need the same browser** that requested them, and email delivery depends on your SMTP setup.
+* **Two tabs of one signed-in browser** converge on the next sync, not instantly.
 * **Search** scans rows (fine for thousands, not millions) and is substring-based: it is accent-insensitive and finds
   Devanagari, but has no stemming or typo tolerance. Add trigram/tsvector indexes as content grows.
 * **A user can probe whether a draft item's UUID exists** (a bookmark insert to a hidden row fails differently from
