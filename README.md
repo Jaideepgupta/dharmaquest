@@ -43,6 +43,9 @@ npm start
    ```
 3. Import the repository into Vercel and deploy. Vercel detects Next.js automatically.
 
+## Deployment
+The site is deployed on Vercel from the `main` branch of this repository. Pushes to `main` build production; other branches get preview deployments.
+
 ## Product architecture direction
 This is a front-end prototype. It intentionally uses sample/static content and does not yet include accounts, a CMS, a database, verse-source licensing, or progress persistence. A future shared backend (e.g. Supabase/PostgreSQL) can power both this Next.js website and a React Native + Expo mobile app.
 
