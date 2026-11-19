@@ -42,3 +42,26 @@ test('dark text tokens are lighter than the dark page background (sanity)', () =
   assert.ok(lum(darkAttr.get('ink')!) > lum(darkAttr.get('paper')!) + 0.5);
   assert.ok(lum(darkAttr.get('muted')!) > lum(darkAttr.get('paper')!) + 0.25);
 });
+
+/* ---- WCAG AA guard: key text/surface pairs must keep >= 4.5:1 in BOTH themes. The full per-page audit is a browser run. ---- */
+const ratio = (a: string, b: string) => {
+  const lin = (h: string, i: number) => { const v = parseInt(h.slice(i, i + 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const L = (h: string) => 0.2126 * lin(h, 1) + 0.7152 * lin(h, 3) + 0.0722 * lin(h, 5);
+  const [x, y] = [L(a), L(b)]; return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+};
+const pick = (theme: 'light' | 'dark', k: string) => (theme === 'light' ? (light.get(k) ?? core.get(k)) : (darkAttr.get(k) ?? core.get(k)))!;
+const PAIRS: [string, string][] = [['ink', 'paper'], ['ink', 'cream'], ['muted', 'paper'], ['muted', 'cream'], ['orange-dark', 'paper']];
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`${theme}: core text/surface pairs meet WCAG AA (4.5:1)`, () => {
+    const bad = PAIRS.map(([f, b]) => [f, b, ratio(pick(theme, f), pick(theme, b))] as const).filter(([, , r]) => r < 4.5);
+    assert.deepEqual(bad, []);
+  });
+}
+
+test('primary button: white text meets 4.5:1 on its fill in both themes', () => {
+  for (const theme of ['light', 'dark'] as const) {
+    assert.ok(ratio('#ffffff', pick(theme, 'btn')) >= 4.5, `${theme} --btn`);
+    assert.ok(ratio('#ffffff', pick(theme, 'btn-hover')) >= 4.5, `${theme} --btn-hover`);
+  }
+});
