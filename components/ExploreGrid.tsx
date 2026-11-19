@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Search } from 'lucide-react';
-import { scriptureCategories } from '@/lib/content/scriptures';
+import { categoryHref, scriptureCategories } from '@/lib/content/scriptures';
 
 const filters = [
   { label: 'All', slugs: null },
@@ -57,7 +57,7 @@ export default function ExploreGrid({ limit }: { limit?: number }) {
               <h3>{item.title}</h3>
               {item.sanskrit && <p className="card-subtitle" lang="sa">{item.sanskrit}</p>}
               <p className="card-description">{item.overview[0].split('. ')[0].replace(/\.$/, '')}.</p>
-              <Link href={item.slug === 'darshanas' ? '/darshanas' : `/scriptures/${item.slug}`} className="card-link">
+              <Link href={categoryHref(item.slug)} className="card-link">
                 Explore {item.title} <ArrowRight size={15} aria-hidden="true" />
               </Link>
             </div>

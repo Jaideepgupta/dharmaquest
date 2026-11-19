@@ -108,3 +108,36 @@ a.path-card{text-decoration:none;color:inherit;transition:.2s}a.path-card:hover{
 .search-filters,.search-suggest,.search-head,.search-foot{flex:none}
 .search-head input[type=search]::-webkit-search-cancel-button,.search-head input[type=search]::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
 .search-head input[type=search]{-webkit-appearance:none;appearance:none}
+/* ---------- Phase 2: Gita Library & verse reader ---------- */
+.container.narrow{width:min(820px,calc(100% - 36px))}
+.chips{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.chip-muted{background:#f1ede4;color:#8a8478}
+.muted{color:#7a756a;font-size:14px;line-height:1.7}
+.notes.spaced{gap:10px;font-size:15px;line-height:1.7;color:#4b483f}
+.chapter-list{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:8px}
+.chapter-list a{display:flex;align-items:center;gap:14px;padding:12px 14px;background:#fffefa;border:1px solid #ebe6dc;transition:.2s;min-height:56px}
+.chapter-list a:hover{border-color:#d8c3a8;background:#faf5ea}
+.chapter-list a>svg{margin-left:auto;flex:none;color:#a06c4a}
+.ch-text{display:flex;flex-direction:column;gap:2px;min-width:0}.ch-text b{font-size:15px}.ch-text small{font-size:12px;color:#827c70}
+.ch-sa{font-family:'Noto Serif Devanagari',serif;font-size:13px;color:#a06c4a}
+.reader{display:block}
+.reader-bar{position:sticky;top:82px;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(247,245,239,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:10px 2px;margin-bottom:22px}
+.reader-ref{font-family:'Playfair Display',serif;font-size:17px}
+.mode-toggle.compact{border:0;gap:6px}.mode-toggle.compact button{display:inline-flex;align-items:center;gap:6px;border:1px solid #e1d8c6;border-radius:999px;padding:9px 16px;font-size:14px;min-height:44px;color:#6f6b62;background:#fffefa}
+.mode-toggle.compact button.selected{background:#2c3029;color:#fff;border-color:#2c3029}
+.verse-card{background:#292e28;color:#f4efe4;padding:30px 28px;margin-bottom:26px}
+.verse-sanskrit{font-family:'Noto Serif Devanagari',serif;font-size:28px;line-height:1.9;color:#f1d7b7;display:grid;gap:2px}
+.verse-sanskrit span,.verse-translit span{display:block}
+.verse-translit{margin-top:16px;font-family:'Playfair Display',serif;font-style:italic;font-size:17px;line-height:1.75;color:#d9cfbd}
+.verse-src{margin:18px 0 0;font-size:12px;letter-spacing:.06em;color:#bdb5a6}
+.rb{padding:6px 0 22px;border-bottom:1px solid var(--line);margin-bottom:22px;scroll-margin-top:150px}
+.rb h2{font-family:'Playfair Display',serif;font-weight:500;font-size:24px;margin:0 0 10px}
+.rb h3{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#9a6849;margin:20px 0 8px}
+.rb p{font-size:17px;line-height:1.85;color:#4b483f;margin:0 0 10px}
+.rb p.note-small{font-size:13px;color:#8a8478}
+.rb.provenance{border-bottom:0;background:#f3eee2;padding:20px 22px}.rb.provenance h2{font-size:19px}
+.words{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin:0 0 12px}.words div{padding:8px 0;border-bottom:1px solid #ece6d9}
+.words dt{font-style:italic;font-family:'Playfair Display',serif;font-size:17px}.words dd{margin:2px 0 0;font-size:14px;color:#6f6b62;line-height:1.5}
+.tl{margin-bottom:12px}.tl h3{margin-top:6px}
+@media(max-width:720px){.reader-bar{top:68px}.verse-sanskrit{font-size:23px}.verse-card{padding:22px 18px}.words{grid-template-columns:1fr}.rb p{font-size:16px}.reader-ref{font-size:15px}.mode-toggle.compact button{padding:9px 12px}}
+@media(max-width:1180px) and (min-width:721px){.nav-links{gap:16px;margin-left:12px}}

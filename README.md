@@ -47,9 +47,12 @@ npm start
 The site is deployed on Vercel from the `main` branch of this repository. Pushes to `main` build production; other branches get preview deployments.
 
 ## Project structure
-- `app/` — routes: `/`, `/scriptures`, `/scriptures/[slug]`, `/darshanas`, `/darshanas/[slug]`, `/learn`, `/about`, plus `sitemap.xml` and `robots.txt`.
+- `app/` — routes: `/`, `/scriptures`, `/scriptures/[slug]`, `/gita`, `/gita/[slug]`, `/gita/bhagavad-gita`, `/gita/bhagavad-gita/[chapter]`, `/gita/bhagavad-gita/[chapter]/[verse]`, `/darshanas`, `/darshanas/[slug]`, `/learn`, `/about`, plus `sitemap.xml` and `robots.txt`.
 - `components/` — shared UI (header, search dialog, footer, page header, explore grid, lesson preview).
-- `lib/content/` — typed, static content (`scriptures.ts`, `darshanas.ts`, `verses.ts`) and the search index. This layer is the seam for a future database: swap these modules for queries without changing the UI.
+- `lib/content/` — typed, static content (`scriptures.ts`, `darshanas.ts`, `verses.ts`, `gita.ts`) and the search index. `gita.ts` holds the Gita catalogue, the 18 Bhagavad Gita chapter guides and verse study records. This layer is the seam for a future database: swap these modules for queries without changing the UI.
+
+## Adding a verse study page
+Add a `VerseStudy` to `verseStudies` in `lib/content/gita.ts`. A page is generated only for verses listed there. Before adding: verify the Sanskrit against a public-domain text, give every translation a named translator and a public-domain or licensed source, and keep your own summaries labelled as DharmaQuest editorial. Datasets whose code is public domain (e.g. Unlicense) may still contain copyrighted translations: check the translation's own licence before reuse.
 
 ## Content rules
 - No verse is added without a source (`SourceRef`). Never invent Sanskrit, chapter or verse references.

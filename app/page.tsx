@@ -6,7 +6,7 @@ import { darshanas } from '@/lib/content/darshanas';
 import { verseOfTheDay as v } from '@/lib/content/verses';
 
 const journey = [
-  { label: 'Bhagavad Gita', detail: 'Chapter 2 · Sankhya Yoga', href: '/scriptures/bhagavad-gita' },
+  { label: 'Bhagavad Gita', detail: 'Chapter 2 · Sankhya Yoga', href: '/gita/bhagavad-gita/2' },
   { label: 'The Upanishads', detail: 'Begin with Isha or Katha', href: '/scriptures/upanishads' },
   { label: 'The Six Darshanas', detail: 'Meet the schools of thought', href: '/darshanas' },
 ];
@@ -58,7 +58,7 @@ export default function Home() {
               <div><dt>Source</dt><dd>{v.source.title} — {v.source.locator}. {v.source.attribution}.</dd></div>
               <div><dt>Transliteration</dt><dd>{v.transliterationScheme}</dd></div>
             </dl>
-            <Link className="text-link" href="/scriptures/bhagavad-gita">Read more <ArrowRight size={15} aria-hidden="true" /></Link>
+            <Link className="text-link" href="/gita/bhagavad-gita/2/47">Read more <ArrowRight size={15} aria-hidden="true" /></Link>
           </div>
           <div className="daily-watermark" aria-hidden="true">ॐ</div>
         </div>

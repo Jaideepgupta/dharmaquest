@@ -8,6 +8,7 @@ import SearchDialog from './SearchDialog';
 
 const links = [
   { href: '/scriptures', label: 'Scriptures' },
+  { href: '/gita', label: 'Gita Library' },
   { href: '/darshanas', label: 'Darshanas' },
   { href: '/learn', label: 'Learn' },
   { href: '/about', label: 'Our approach' },

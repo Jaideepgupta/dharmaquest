@@ -11,6 +11,7 @@ export default function SiteFooter() {
         <p>A modern learning space for timeless ideas.</p>
         <nav className="footer-links" aria-label="Footer">
           <Link href="/scriptures">Scriptures</Link>
+          <Link href="/gita">Gita Library</Link>
           <Link href="/darshanas">Darshanas</Link>
           <Link href="/learn">Learn</Link>
           <Link href="/about">Our approach</Link>

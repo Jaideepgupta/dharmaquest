@@ -6,10 +6,12 @@ import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import { getCategory, scriptureCategories } from '@/lib/content/scriptures';
 
+const DEDICATED = ['darshanas', 'bhagavad-gita', 'other-gitas'];
+
 type Props = { params: { slug: string } };
 
 export function generateStaticParams() {
-  return scriptureCategories.filter((c) => c.slug !== 'darshanas').map((c) => ({ slug: c.slug }));
+  return scriptureCategories.filter((c) => !DEDICATED.includes(c.slug)).map((c) => ({ slug: c.slug }));
 }
 
 export function generateMetadata({ params }: Props): Metadata {
@@ -20,7 +22,7 @@ export function generateMetadata({ params }: Props): Metadata {
 
 export default function ScripturePage({ params }: Props) {
   const c = getCategory(params.slug);
-  if (!c || c.slug === 'darshanas') notFound();
+  if (!c || DEDICATED.includes(c.slug)) notFound();
 
   return (
     <>

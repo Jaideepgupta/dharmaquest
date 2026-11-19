@@ -107,7 +107,7 @@ export const scriptureCategories: ScriptureCategory[] = [
     ],
     detailStatus: 'under-review',
     related: [
-      { label: 'Other Gitas', href: '/scriptures/other-gitas' },
+      { label: 'Other Gitas', href: '/gita' },
       { label: 'Mahabharata', href: '/scriptures/mahabharata' },
       { label: 'Vedanta', href: '/darshanas/vedanta' },
     ],
@@ -140,7 +140,7 @@ export const scriptureCategories: ScriptureCategory[] = [
       'Detailed pages (speakers, themes, structure, references) are in preparation. Chapter and verse counts: not yet verified.',
     ],
     detailStatus: 'under-review',
-    related: [{ label: 'Bhagavad Gita', href: '/scriptures/bhagavad-gita' }],
+    related: [{ label: 'Bhagavad Gita', href: '/gita/bhagavad-gita' }],
   },
   {
     slug: 'ramayana',
@@ -197,7 +197,7 @@ export const scriptureCategories: ScriptureCategory[] = [
     ],
     notes: [UNDER_REVIEW_NOTE],
     detailStatus: 'under-review',
-    related: [{ label: 'Bhagavad Gita', href: '/scriptures/bhagavad-gita' }],
+    related: [{ label: 'Bhagavad Gita', href: '/gita/bhagavad-gita' }],
   },
   {
     slug: 'puranas',
@@ -270,3 +270,10 @@ export const scriptureCategories: ScriptureCategory[] = [
 ];
 
 export const getCategory = (slug: string) => scriptureCategories.find((c) => c.slug === slug);
+
+/** Collections with their own dedicated section live outside /scriptures/[slug]. */
+export const categoryHref = (slug: string) =>
+  slug === 'bhagavad-gita' ? '/gita/bhagavad-gita'
+  : slug === 'other-gitas' ? '/gita'
+  : slug === 'darshanas' ? '/darshanas'
+  : `/scriptures/${slug}`;

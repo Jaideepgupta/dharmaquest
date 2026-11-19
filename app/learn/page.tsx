@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const paths = [
   { id: 'beginner', level: 'Beginner', title: 'New to the wisdom', blurb: 'Build a foundation: the main texts, the big questions and a feel for how the traditions fit together.',
     steps: [
-      { label: 'Bhagavad Gita: overview and chapters', href: '/scriptures/bhagavad-gita' },
+      { label: 'Bhagavad Gita: overview and chapters', href: '/gita/bhagavad-gita' },
       { label: 'The Upanishads: a first look', href: '/scriptures/upanishads' },
       { label: 'Ramayana: the seven Kandas', href: '/scriptures/ramayana' },
       { label: 'The Six Darshanas: the core questions', href: '/darshanas' },
@@ -19,7 +19,7 @@ const paths = [
   { id: 'intermediate', level: 'Intermediate', title: 'Curious explorer', blurb: 'Connect texts and compare ideas across traditions.',
     steps: [
       { label: 'Mahabharata and its Parvas', href: '/scriptures/mahabharata' },
-      { label: 'Other Gitas: different voices, different contexts', href: '/scriptures/other-gitas' },
+      { label: 'Gita Library: different voices, different contexts', href: '/gita' },
       { label: 'Samkhya and Yoga', href: '/darshanas/samkhya' },
       { label: 'The Vedas and their four layers', href: '/scriptures/vedas' },
     ] },

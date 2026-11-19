@@ -84,3 +84,67 @@ export interface SearchEntry {
   kind: 'Scripture' | 'Gita' | 'Upanishad' | 'Darshana' | 'Concept' | 'Epic' | 'Path';
   keywords: string;
 }
+
+/* ---------- Gita Library ---------- */
+export interface GitaText {
+  slug: string;
+  name: string;
+  sanskrit: string;
+  tagline: string;
+  classification: Classification[];
+  /** Where the text sits in the tradition. Only widely stated facts. */
+  location: string;
+  intro: string;
+  context: string;
+  speakers: string[];
+  themes: string[];
+  /** null = not established/verified yet. */
+  chapters: number | null;
+  verses: number | null;
+  structureNote: string;
+  keyTeachings: string[];
+  relatedTraditions: string[];
+  references: string[];
+  detailStatus: ContentStatus;
+}
+
+export interface ImportantVerse { ref: string; topic: string }
+
+export interface GitaChapter {
+  number: number;
+  sanskritName: string;
+  name: string;
+  englishTitle: string;
+  verseCount: number;
+  intro: string;
+  happens: string;
+  message: string;
+  concepts: string[];
+  importantVerses: ImportantVerse[];
+}
+
+export interface WordGloss { word: string; gloss: string }
+
+export interface VerseStudy {
+  chapter: number;
+  verse: number;
+  reference: string;
+  sanskrit: string[];
+  transliteration: string[];
+  transliterationScheme: string;
+  sourceLines: string[];
+  words: WordGloss[];
+  wordsNote: string;
+  hindi: { text?: string; translator?: string; status: ContentStatus };
+  english: { text?: string; translator?: string; status: ContentStatus };
+  brief: { say: string; mean: string; why: string; learn: string };
+  detailed: {
+    terms: { term: string; meaning: string }[];
+    structure: string[];
+    context: string;
+    apply: string;
+    related: { ref: string; topic: string; href?: string }[];
+    commentaryNote: string;
+  };
+  provenance: string[];
+}

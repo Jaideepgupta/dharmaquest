@@ -1,9 +1,11 @@
 import { scriptureCategories } from './scriptures';
 import { darshanas } from './darshanas';
+import { bhagavadGitaChapters, gitaTexts, verseStudies } from './gita';
+import { categoryHref } from './scriptures';
 import type { SearchEntry } from './types';
 
 const concepts: { title: string; subtitle: string; href: string; keywords: string }[] = [
-  { title: 'Karma', subtitle: 'Action and its consequences', href: '/scriptures/bhagavad-gita', keywords: 'karma yoga action phala fruits' },
+  { title: 'Karma', subtitle: 'Action and its consequences', href: '/gita/bhagavad-gita/2/47', keywords: 'karma yoga action phala fruits' },
   { title: 'Dharma', subtitle: 'Duty and right action', href: '/darshanas/purva-mimamsa', keywords: 'dharma duty' },
   { title: 'Atman', subtitle: 'The Self', href: '/darshanas/vedanta', keywords: 'atman self soul' },
   { title: 'Brahman', subtitle: 'Ultimate reality', href: '/darshanas/vedanta', keywords: 'brahman reality absolute' },
@@ -19,36 +21,54 @@ export function buildSearchIndex(): SearchEntry[] {
   const entries: SearchEntry[] = [];
 
   for (const c of scriptureCategories) {
+    if (c.slug === 'bhagavad-gita' || c.slug === 'other-gitas') continue; // covered by the Gita Library entries below
     entries.push({
       title: c.title,
       subtitle: c.tagline,
-      href: `/scriptures/${c.slug}`,
+      href: categoryHref(c.slug),
       kind: c.slug === 'ramayana' || c.slug === 'mahabharata' ? 'Epic' : 'Scripture',
       keywords: `${c.sanskrit ?? ''} ${c.classification.join(' ')}`,
     });
-    if (c.slug === 'upanishads' || c.slug === 'other-gitas') {
+    if (c.slug === 'upanishads') {
       for (const i of c.items ?? []) {
         if (i.name.startsWith('Other')) continue;
         entries.push({
           title: i.name,
           subtitle: i.note ?? '',
           href: `/scriptures/${c.slug}`,
-          kind: c.slug === 'upanishads' ? 'Upanishad' : 'Gita',
+          kind: 'Upanishad',
           keywords: `${i.tag ?? ''} ${c.title}`,
         });
       }
     }
-    if (c.slug === 'bhagavad-gita') {
-      for (const i of c.items ?? []) {
-        entries.push({
-          title: `Bhagavad Gita ${i.name}`,
-          subtitle: i.note ?? '',
-          href: `/scriptures/${c.slug}`,
-          kind: 'Gita',
-          keywords: 'chapter adhyaya',
-        });
-      }
-    }
+  }
+
+  for (const g of gitaTexts) {
+    entries.push({
+      title: g.name,
+      subtitle: g.tagline,
+      href: g.slug === 'bhagavad-gita' ? '/gita/bhagavad-gita' : `/gita/${g.slug}`,
+      kind: 'Gita',
+      keywords: `${g.sanskrit} ${g.speakers.join(' ')} ${g.relatedTraditions.join(' ')}`,
+    });
+  }
+  for (const ch of bhagavadGitaChapters) {
+    entries.push({
+      title: `Bhagavad Gita chapter ${ch.number}: ${ch.englishTitle}`,
+      subtitle: ch.name,
+      href: `/gita/bhagavad-gita/${ch.number}`,
+      kind: 'Gita',
+      keywords: `${ch.sanskritName} ${ch.concepts.join(' ')} adhyaya chapter`,
+    });
+  }
+  for (const v of verseStudies) {
+    entries.push({
+      title: v.reference,
+      subtitle: v.brief.say,
+      href: `/gita/bhagavad-gita/${v.chapter}/${v.verse}`,
+      kind: 'Gita',
+      keywords: `${v.sanskrit.join(' ')} ${v.transliteration.join(' ')} karma phala adhikara verse shloka`,
+    });
   }
 
   for (const d of darshanas) {
