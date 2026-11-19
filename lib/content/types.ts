@@ -148,3 +148,25 @@ export interface VerseStudy {
   };
   provenance: string[];
 }
+
+/* ---------- Darshana comparison ---------- */
+export interface CompareDimension { id: string; label: string }
+
+export interface CompareEntry {
+  id: string;
+  name: string;
+  href?: string;
+  /** One cell of explanation per dimension id. Never a single-word label. */
+  cells: Record<string, string>;
+}
+
+export interface CompareSet {
+  id: 'darshanas' | 'vedanta';
+  title: string;
+  intro: string;
+  caution: string;
+  dimensions: CompareDimension[];
+  entries: CompareEntry[];
+}
+
+export interface Thinker { name: string; note: string }

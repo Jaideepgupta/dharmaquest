@@ -26,6 +26,7 @@ const paths = [
   { id: 'advanced', level: 'Advanced', title: 'Dedicated student', blurb: 'Study philosophical traditions and how they read the same sources.',
     steps: [
       { label: 'Vedanta and its sub-schools', href: '/darshanas/vedanta' },
+      { label: 'Compare the Darshanas side by side', href: '/darshanas/compare' },
       { label: 'Nyaya: logic and the Pramanas', href: '/darshanas/nyaya' },
       { label: 'Purva Mimamsa: interpretation and Dharma', href: '/darshanas/purva-mimamsa' },
       { label: 'Puranas and traditions', href: '/scriptures/puranas' },

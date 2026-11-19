@@ -13,7 +13,9 @@ export default function DarshanasPage() {
   return (
     <>
       <PageHeader crumbs={[{ label: 'Darshanas' }]} kicker="THE BIG QUESTIONS" title="Explore the Six Darshanas" sanskrit="षड्दर्शन"
-        lede="The six classical schools of Indian philosophy that accept the authority of the Vedas. Each asks a different core question." />
+        lede="The six classical schools of Indian philosophy that accept the authority of the Vedas. Each asks a different core question.">
+        <div className="hero-buttons" style={{ marginTop: 22 }}><Link href="/darshanas/compare" className="button button-primary">Compare the schools side by side <ArrowRight size={16} aria-hidden="true" /></Link></div>
+      </PageHeader>
       <section className="section tight">
         <div className="container">
           <ul className="d-cards">
@@ -39,7 +41,8 @@ export default function DarshanasPage() {
               <li key={s.name}><div><b>{s.name}</b><span className="chip">{s.founder}</span></div><p>{s.summary}</p></li>
             ))}
           </ul>
-          <p className="note-small pad">An interactive side-by-side comparison of the schools is in preparation. Summaries above are deliberately brief and do not replace study of the texts.</p>
+          <p className="note-small pad">These summaries are deliberately brief. For a fuller side-by-side view, use the comparison.</p>
+          <p className="cta-row"><Link href="/darshanas/compare?set=vedanta" className="button button-outline">Compare the Vedanta sub-schools <ArrowRight size={16} aria-hidden="true" /></Link></p>
         </div>
       </section>
     </>

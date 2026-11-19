@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import { darshanas, getDarshana, vedantaSchools } from '@/lib/content/darshanas';
+import { darshanaComparison, relations, thinkers } from '@/lib/content/comparison';
 
 type Props = { params: { slug: string } };
 
@@ -24,6 +25,9 @@ export default function DarshanaPage({ params }: Props) {
   const i = darshanas.findIndex((x) => x.slug === d.slug);
   const prev = darshanas[i - 1];
   const next = darshanas[i + 1];
+  const row = darshanaComparison.entries.find((e) => e.id === d.slug);
+  const answers = ['reality', 'self', 'liberation', 'knowledge'] as const;
+  const label = (id: string) => darshanaComparison.dimensions.find((x) => x.id === id)?.label ?? id;
 
   return (
     <>
@@ -42,6 +46,36 @@ export default function DarshanaPage({ params }: Props) {
               {d.keyConcepts.map((k) => <li key={k.term}><div><b>{k.term}</b></div><p>{k.meaning}</p></li>)}
             </ul>
 
+            {row && (
+              <>
+                <h2>How {d.name} answers the big questions</h2>
+                <dl className="answers">
+                  {answers.map((k) => <div key={k}><dt>{label(k)}</dt><dd>{row.cells[k]}</dd></div>)}
+                </dl>
+                <h2>Texts</h2>
+                <p>{row.cells.texts}</p>
+                <p className="note-small">Summaries are DharmaQuest’s own, based on standard scholarly outlines. They are not quotations from the texts.</p>
+              </>
+            )}
+
+            {thinkers[d.slug] && (
+              <>
+                <h2>Major thinkers</h2>
+                <ul className="catalog">{thinkers[d.slug].map((t) => <li key={t.name}><div><b>{t.name}</b></div><p>{t.note}</p></li>)}</ul>
+              </>
+            )}
+
+            {relations[d.slug] && (
+              <>
+                <h2>Relation to other schools</h2>
+                {relations[d.slug].map((r) => <p key={r}>{r}</p>)}
+              </>
+            )}
+
+            <div className="cta-row">
+              <Link href={`/darshanas/compare${d.slug === 'vedanta' ? '?set=vedanta' : ''}`} className="button button-primary">{d.slug === 'vedanta' ? 'Compare the Vedanta sub-schools' : `Compare ${d.name} with other schools`} <ArrowRight size={16} aria-hidden="true" /></Link>
+            </div>
+
             {d.slug === 'vedanta' && (
               <>
                 <h2>Sub-schools of Vedanta</h2>
@@ -55,9 +89,12 @@ export default function DarshanaPage({ params }: Props) {
           <aside className="side-card" aria-label="About this Darshana">
             <h2>Foundational text</h2>
             <p className="ft"><b>{d.foundationalText}</b><br />{d.foundationalAttribution}</p>
-            <h3>Learning content</h3>
-            <p><StatusBadge status={d.detailStatus} /></p>
-            <p className="note-small">Detailed lessons, quotations from the texts and commentary are added only once sourced from identified editions.</p>
+            <h3>Content status</h3>
+            <dl>
+              <div><dt>Overview and comparison</dt><dd><StatusBadge status="published" /></dd></div>
+              <div><dt>Detailed lessons and quotations from the texts</dt><dd><StatusBadge status={d.detailStatus} /></dd></div>
+            </dl>
+            <p className="note-small" style={{ marginTop: 12 }}>Quotations and commentary are added only once sourced from identified editions.</p>
             {d.notes && <ul className="notes">{d.notes.map((n) => <li key={n}>{n}</li>)}</ul>}
           </aside>
         </div>

@@ -2,6 +2,7 @@ import { scriptureCategories } from './scriptures';
 import { darshanas } from './darshanas';
 import { bhagavadGitaChapters, gitaTexts, verseStudies } from './gita';
 import { categoryHref } from './scriptures';
+import { vedantaComparison, thinkers } from './comparison';
 import type { SearchEntry } from './types';
 
 const concepts: { title: string; subtitle: string; href: string; keywords: string }[] = [
@@ -77,8 +78,16 @@ export function buildSearchIndex(): SearchEntry[] {
       subtitle: d.coreQuestion,
       href: `/darshanas/${d.slug}`,
       kind: 'Darshana',
-      keywords: `${d.sanskrit} ${d.focus} ${d.keyConcepts.map((k) => k.term).join(' ')}`,
+      keywords: `${d.sanskrit} ${d.focus} ${d.keyConcepts.map((k) => k.term).join(' ')} ${(thinkers[d.slug] ?? []).map((t) => t.name).join(' ')}`,
     });
+  }
+
+  entries.push(
+    { title: 'Compare the Darshanas', subtitle: 'Side-by-side comparison of the six schools', href: '/darshanas/compare', kind: 'Darshana', keywords: 'compare comparison table differences schools' },
+    { title: 'Compare Vedanta sub-schools', subtitle: 'Advaita, Vishishtadvaita, Dvaita and more', href: '/darshanas/compare?set=vedanta', kind: 'Darshana', keywords: 'compare vedanta sub-schools comparison differences' },
+  );
+  for (const e of vedantaComparison.entries) {
+    entries.push({ title: e.name, subtitle: e.cells.relation, href: `/darshanas/compare?set=vedanta&schools=${e.id === 'advaita' ? 'advaita,vishishtadvaita' : `advaita,${e.id}`}`, kind: 'Darshana', keywords: `${e.cells.teachers} ${e.cells.texts} vedanta` });
   }
 
   for (const k of concepts) entries.push({ ...k, kind: 'Concept' });

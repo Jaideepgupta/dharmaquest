@@ -6,7 +6,7 @@ import { bhagavadGitaChapters, gitaTexts, verseStudies } from '@/lib/content/git
 const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://dharmaquest-app.vercel.app';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes = ['', '/scriptures', '/gita', '/gita/bhagavad-gita', '/darshanas', '/learn', '/about'];
+  const staticRoutes = ['', '/scriptures', '/gita', '/gita/bhagavad-gita', '/darshanas', '/darshanas/compare', '/learn', '/about'];
   const dedicated = ['darshanas', 'bhagavad-gita', 'other-gitas'];
   const scriptures = scriptureCategories.filter((c) => !dedicated.includes(c.slug)).map((c) => `/scriptures/${c.slug}`);
   const ds = darshanas.map((d) => `/darshanas/${d.slug}`);
