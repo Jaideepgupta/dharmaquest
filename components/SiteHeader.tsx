@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { ArrowRight, Menu, Search, X } from 'lucide-react';
 import SearchDialog from './SearchDialog';
 import AuthLink from './AuthLink';
+import ThemeToggle from './ThemeToggle';
 
 const links = [
   { href: '/scriptures', label: 'Scriptures' },
@@ -51,6 +52,7 @@ export default function SiteHeader() {
 
         <div className="nav-actions">
           <AuthLink />
+          <ThemeToggle />
           <button type="button" className="icon-button search-top" aria-label="Search (Ctrl+K)" onClick={() => setSearchOpen(true)}><Search size={19} /></button>
           <Link className="button button-dark button-small" href="/learn">Start learning <ArrowRight size={15} aria-hidden="true" /></Link>
         </div>

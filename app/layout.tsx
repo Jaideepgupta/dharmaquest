@@ -23,11 +23,20 @@ export const metadata: Metadata = {
   twitter: { card: 'summary', title: 'DharmaQuest', description: 'A modern learning journey through Sanatan Dharma.' },
 };
 
-export const viewport: Viewport = { themeColor: '#f7f4ec', width: 'device-width', initialScale: 1 };
+export const viewport: Viewport = {
+  themeColor: [{ media: '(prefers-color-scheme: light)', color: '#f7f4ec' }, { media: '(prefers-color-scheme: dark)', color: '#151613' }],
+  colorScheme: 'light dark',
+  width: 'device-width',
+  initialScale: 1,
+};
+
+/** Runs before first paint so a saved choice never flashes the wrong theme. Must stay tiny and dependency-free. */
+const themeInit = `try{var t=localStorage.getItem('dq-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: themeInit }} /></head>
       <body>
         <a className="skip-link" href="#main">Skip to content</a>
         <div className="announcement"><Sparkles size={14} aria-hidden="true" /> A new way to explore timeless wisdom <span className="announcement-dot" aria-hidden="true">✦</span> Start with one lesson a day</div>
