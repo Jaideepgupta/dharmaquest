@@ -98,12 +98,14 @@ const subschools = make({
 
 function collectionLesson(slug: string, id: string, level: Level, title: string, summary: string): Lesson {
   const c = getCategory(slug)!;
+  // Only real source notes: the generic "lessons are in preparation" line is not one, and an empty section must never render.
+  const sourceNotes = (c.notes ?? []).filter((n) => !n.startsWith('Detailed lessons'));
   return make({
     id, title, level, collection: c.title, summary,
     sections: [
       { heading: 'Overview', paragraphs: c.overview },
       ...(c.items ? [{ heading: c.itemsHeading ?? 'Contents', bullets: c.items.map((i) => (i.note ? `${i.name}${i.tag ? ` (${i.tag})` : ''}: ${i.note}` : i.name)) }] : []),
-      ...(c.notes?.length ? [{ heading: 'Notes on sources', bullets: c.notes.filter((n) => !n.startsWith('Detailed lessons')) }] : []),
+      ...(sourceNotes.length ? [{ heading: 'Notes on sources', bullets: sourceNotes }] : []),
     ],
     readMore: [{ label: `${c.title}`, href: `/scriptures/${c.slug}` }],
     quizId: id,

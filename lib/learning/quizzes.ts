@@ -4,7 +4,7 @@ import type { Quiz } from './types';
  * Every question must be answerable from content already on the site, and every
  * answer carries an explanation. Do not add questions that depend on unsourced claims.
  */
-export const quizzes: Quiz[] = [
+const authored: Quiz[] = [
   {
     id: 'gita-overview', title: 'Bhagavad Gita overview',
     questions: [
@@ -142,9 +142,40 @@ export const quizzes: Quiz[] = [
     questions: [
       { type: 'mcq', prompt: 'How many Parvas (books) does the Mahabharata have?', options: ['Seven', 'Twelve', 'Eighteen', 'Twenty-four'], answer: 2, explanation: 'Eighteen Parvas, from Adi Parva to Svargarohana Parva.' },
       { type: 'tf', prompt: 'The Bhagavad Gita is found in the Bhishma Parva.', answer: true, explanation: 'The Gita forms part of the Bhishma Parva.' },
-      { type: 'mcq', prompt: 'To whom is the Mahabharata traditionally attributed?', options: ['Valmiki', 'Vyasa', 'Patanjali', 'Kanada'], answer: 1, explanation: 'Vyasa.' },
+      { type: 'mcq', prompt: 'To whom is the Mahabharata traditionally attributed?', options: ['Valmiki', 'Vyasa', 'Patanjali', 'Kanada'], answer: 1, explanation: 'Vyasa is the traditional author of the Mahabharata. Valmiki is associated with the Ramayana.' },
     ],
   },
 ];
+
+/**
+ * Where the correct option sits should not be guessable. Questions are authored with the answer
+ * wherever reads naturally; this step moves the correct option so that every position is used about
+ * equally. It swaps the correct option with the one in the target slot (other options keep their
+ * order) and never touches questions whose options have a natural order (numbers, counts, verse refs).
+ * Deterministic: the same authored data always yields the same quiz.
+ */
+const NUMBER_WORDS = /^(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|eighteen|twenty|twenty-four)$/i;
+const isOrdered = (options: string[]) => options.every((o) => /^[\d.]+$/.test(o) || NUMBER_WORDS.test(o));
+
+export function placeAnswers(input: Quiz[]): Quiz[] {
+  const used = [0, 0, 0, 0];
+  // Count questions that must stay as authored, so the rest can compensate.
+  for (const z of input) for (const q of z.questions) if ((q.type === 'mcq' || q.type === 'teaching') && isOrdered(q.options)) used[q.answer] += 1;
+  return input.map((z) => ({
+    ...z,
+    questions: z.questions.map((q) => {
+      if ((q.type !== 'mcq' && q.type !== 'teaching') || isOrdered(q.options)) return q;
+      // Least-used slot among the positions this question has; prefer later slots on ties (fixes the D gap).
+      let target = 0;
+      for (let i = 0; i < q.options.length; i++) if (used[i] <= used[target]) target = i;
+      used[target] += 1;
+      const options = [...q.options];
+      [options[q.answer], options[target]] = [options[target], options[q.answer]];
+      return { ...q, options, answer: target };
+    }),
+  }));
+}
+
+export const quizzes: Quiz[] = placeAnswers(authored);
 
 export const getQuiz = (id: string) => quizzes.find((q) => q.id === id);
