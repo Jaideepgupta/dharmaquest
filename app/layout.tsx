@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Sparkles } from 'lucide-react';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import AuthSync from '@/components/AuthSync';
 import './globals.css';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://dharmaquest-app.vercel.app';
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <a className="skip-link" href="#main">Skip to content</a>
         <div className="announcement"><Sparkles size={14} aria-hidden="true" /> A new way to explore timeless wisdom <span className="announcement-dot" aria-hidden="true">✦</span> Start with one lesson a day</div>
+        <AuthSync />
         <SiteHeader />
         <main id="main">{children}</main>
         <SiteFooter />

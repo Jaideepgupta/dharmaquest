@@ -6,12 +6,15 @@ import { ArrowRight, Download, Trash2, Upload, X } from 'lucide-react';
 import { clearAll, computeStreak, dayNumber, exportData, importData, localDate, setDaily, toggleBookmark, useLearning, type BookmarkKind } from '@/lib/learning/store';
 import { completedCount, currentLevel, nextLesson, pickDaily } from '@/lib/learning/recommend';
 import { LEVELS, type LessonMeta } from '@/lib/learning/types';
+import { isLinked, useAccountStatus } from '@/lib/auth/status';
 
 const KIND_LABEL: Record<BookmarkKind, string> = { verse: 'Verses', chapter: 'Chapters', scripture: 'Scriptures', lesson: 'Lessons', darshana: 'Darshanas' };
 const KIND_ORDER: BookmarkKind[] = ['verse', 'chapter', 'lesson', 'scripture', 'darshana'];
 
 export default function ProgressDashboard({ meta: lessons }: { meta: LessonMeta[] }) {
   const { state, ready, persistent } = useLearning();
+  const { status: account } = useAccountStatus();
+  const linked = isLinked(account);
   const [msg, setMsg] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -141,18 +144,22 @@ export default function ProgressDashboard({ meta: lessons }: { meta: LessonMeta[
 
       <section className="dash-card" aria-labelledby="d-data">
         <h2 id="d-data">Your data</h2>
-        <p className="muted">Everything on this page is stored only in this browser. It isn’t sent anywhere. Clearing your browser data will erase it, so export a copy if you want to keep it or move it to another device.</p>
+        {linked ? (
+          <p className="muted">Your progress is saved to your account (<b>{account.email}</b>) and kept in step across your devices. To sign out or delete your account, use the <Link href="/account">Account page</Link>. You can still export a copy below.</p>
+        ) : (
+          <p className="muted">Everything on this page is stored only in this browser. It isn’t sent anywhere. Clearing your browser data will erase it, so export a copy if you want to keep it or move it to another device.</p>
+        )}
         <div className="lesson-actions">
           <button type="button" className="button button-outline" onClick={onExport} disabled={!hasAnything}><Download size={15} aria-hidden="true" /> Export</button>
-          <label className="button button-outline file-btn"><Upload size={15} aria-hidden="true" /> Import<input ref={fileRef} type="file" accept="application/json,.json" onChange={(e) => onImport(e.target.files?.[0])} /></label>
-          {!confirmClear
+          <label className={`button button-outline file-btn ${linked ? 'disabled' : ''}`}><Upload size={15} aria-hidden="true" /> Import<input ref={fileRef} type="file" accept="application/json,.json" disabled={linked} onChange={(e) => onImport(e.target.files?.[0])} /></label>
+          {!linked && (!confirmClear
             ? <button type="button" className="cmp-reset" onClick={() => setConfirmClear(true)} disabled={!hasAnything}><Trash2 size={14} aria-hidden="true" /> Clear all</button>
             : <span className="confirm"><b>Erase all progress, bookmarks and history?</b>
                 <button type="button" className="button button-small button-dark" onClick={() => { clearAll(); setConfirmClear(false); setMsg('All local data cleared.'); }}>Yes, erase</button>
-                <button type="button" className="cmp-reset" onClick={() => setConfirmClear(false)}>Cancel</button></span>}
+                <button type="button" className="cmp-reset" onClick={() => setConfirmClear(false)}>Cancel</button></span>)}
         </div>
         <p className="note-small" aria-live="polite">{msg}</p>
-        <p className="note-small">Importing replaces what is currently saved.</p>
+        {!linked && <p className="note-small">Importing replaces what is currently saved.</p>}
       </section>
     </div>
   );

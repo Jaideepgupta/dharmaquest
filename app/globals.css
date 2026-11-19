@@ -247,3 +247,18 @@ a.chip{text-decoration:none}a.chip:hover{background:#e6d9c3}
 button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:1000px){.lesson-grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.dash-cols{grid-template-columns:1fr}}
 @media(max-width:720px){.lesson-grid{grid-template-columns:1fr}.match-row{grid-template-columns:1fr}.quiz{padding:18px}.stats b{font-size:28px}.dash-card{padding:18px}}
+/* ---------- Phase 5b: account ---------- */
+.auth-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#66635b;min-height:44px;padding:0 4px}.auth-link:hover{color:var(--orange-dark)}
+.acct-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+.acct-card{background:#fffefa;border:1px solid #e8e1d3;padding:26px}.acct-card.quiet{background:#f6f2e8}.acct-card.danger{border-color:#e3c6c1}
+.acct-card h2{font-family:'Playfair Display',serif;font-weight:500;font-size:24px;margin:0 0 12px}.acct-card p{font-size:15px;line-height:1.7;color:#4b483f}
+.acct-card label{display:block;font-size:13px;letter-spacing:.06em;color:#6f6b62;margin:18px 0 6px}
+.acct-card input{width:100%;min-height:48px;font:inherit;font-size:16px;padding:10px 12px;border:1px solid #cfc5b0;background:#fff;color:var(--ink);margin-bottom:14px}
+.acct-card input[aria-invalid=true]{border-color:#b24a3f}
+.acct-err{color:#8a3a30!important;font-size:14px!important;margin:-6px 0 12px}
+.acct-sent{display:flex;gap:14px;align-items:flex-start;background:#eaf4ec;border-left:4px solid #4d8a5a;padding:16px 18px;margin-top:10px}.acct-sent svg{flex:none;color:#3d7a4a;margin-top:2px}.acct-sent p{margin:6px 0}
+.acct-sync{display:flex;align-items:center;gap:8px;font-size:15px;margin:6px 0 12px}.acct-sync.ok{color:#34503c}.acct-sync.warn{color:#7a5316}
+.spin{animation:dq-spin 1s linear infinite}@keyframes dq-spin{to{transform:rotate(360deg)}}
+@media(max-width:1000px){.acct-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.auth-link span{display:none}.acct-card{padding:18px}}
+.file-btn.disabled{opacity:.5;cursor:not-allowed}.file-btn.disabled input{cursor:not-allowed}
