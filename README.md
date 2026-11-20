@@ -67,7 +67,11 @@ what has not been verified. Commands: `npm test` (TypeScript), `npm run db:test`
 `npm run check` (everything), `npm run db:seed` (regenerate `supabase/seed.sql` after content changes).
 
 ## Adding a verse study page
-Add a `VerseStudy` to `verseStudies` in `lib/content/gita.ts`. A page is generated only for verses listed there. Before adding: verify the Sanskrit against a public-domain text, give every translation a named translator and a public-domain or licensed source, and keep your own summaries labelled as DharmaQuest editorial. Datasets whose code is public domain (e.g. Unlicense) may still contain copyrighted translations: check the translation's own licence before reuse.
+Add a `VerseStudy` to `lib/content/gita-verses.ts` (the original 2.47 template lives in `lib/content/gita.ts`). A page is generated only for verses listed there. Procedure, in order:
+1. **Two-source check.** Compare the Sanskrit word for word between two *independent* public copies (we used the open `gita/gita` dataset and Sanskrit Wikisource). If the words differ, do not add the verse; if only spelling differs (anusvāra vs conjunct nasal, avagraha), note it in `provenance`.
+2. Write the IAST yourself; `tests/verse-sanskrit.test.ts` converts it back and fails on any typo or unsandhied compound.
+3. Give every translation a named translator and a public-domain or licensed source; otherwise leave it "under review". Label your own summaries as DharmaQuest editorial. Datasets whose code is public domain (e.g. Unlicense) may still contain copyrighted translations: check the translation's own licence before reuse.
+4. Run `npm run db:seed` and commit `supabase/seed.sql`; add the verse label to the list in `supabase/tests/10_seed_integrity.sql`.
 
 ## Content rules
 - No verse is added without a source (`SourceRef`). Never invent Sanskrit, chapter or verse references.

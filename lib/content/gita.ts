@@ -1,4 +1,5 @@
 import type { GitaChapter, GitaText, VerseStudy } from './types';
+import { moreVerseStudies } from './gita-verses';
 
 const PENDING = 'Not yet verified against an identified edition.';
 
@@ -281,7 +282,7 @@ export const bhagavadGitaChapters: GitaChapter[] = [
 export const getChapter = (n: number) => bhagavadGitaChapters.find((c) => c.number === n);
 
 /** Verses with a full study page. Only verses whose source is verified are added. */
-export const verseStudies: VerseStudy[] = [
+const firstVerseStudies: VerseStudy[] = [
   {
     chapter: 2,
     verse: 47,
@@ -345,6 +346,12 @@ export const verseStudies: VerseStudy[] = [
       'Hindi and English translations: none yet. They will be added only from a named, public-domain or licensed translator.',
     ],
   },
+];
+
+/** 2.47 first (the lesson generator reads the first entry), then the rest in chapter and verse order. */
+export const verseStudies: VerseStudy[] = [
+  ...firstVerseStudies,
+  ...[...moreVerseStudies].sort((a, b) => a.chapter - b.chapter || a.verse - b.verse),
 ];
 
 export const getVerseStudy = (chapter: number, verse: number) =>

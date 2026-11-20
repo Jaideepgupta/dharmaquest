@@ -33,12 +33,14 @@ select t.assert((select p.slug from public.scriptures s join public.scriptures p
 
 -- Source integrity
 select t.assert(not exists (select 1 from public.verses where source_id is null), 'every verse has a source');
-select t.assert((select count(*) from public.verses) = 1, 'exactly one verse (2.47): only sourced verses are present');
+select t.assert((select array_agg(label order by label) from public.verses) = array['2.13','2.20','2.47','3.35','4.7','4.8','6.5','9.22'],
+  'exactly the 8 cross-checked verses are present (adding a verse is a deliberate edit of this list, after a two-source check)');
 select t.assert((select count(*) from public.verse_translations) = 0, 'NO translations exist: none is invented before a named translator is added');
 select t.assert((select count(*) from public.commentaries) = 0, 'NO commentaries exist: none is invented');
-select t.assert((select count(*) from public.verse_words) = 12, '12 word glosses for 2.47');
+select t.assert(not exists (select 1 from public.verses v where not exists (select 1 from public.verse_words w where w.verse_id = v.id)), 'every verse has word glosses');
 select t.assert((select bool_and(origin = 'dharmaquest_editorial') from public.verse_words), 'word glosses are labelled editorial');
-select t.assert((select count(*) from public.verse_explanations) = 4, '4 editorial explanations for 2.47');
+select t.assert(not exists (select 1 from public.verses v where (select count(*) from public.verse_explanations e where e.verse_id = v.id) <> 4), 'every verse has exactly 4 editorial explanations');
+select t.assert((select bool_and(origin = 'dharmaquest_editorial') from public.verse_explanations), 'explanations are labelled editorial');
 select t.assert((select verified and license = 'public_domain' from public.content_sources where slug = 'bg-sanskrit-standard'), 'the Sanskrit source is verified, public domain');
 select t.assert(not (select verified from public.content_sources where slug = 'gita-json-dataset'), 'the third-party dataset is NOT marked verified/usable');
 select t.assert(not exists (select 1 from public.content_sources where license = 'unknown' and verified), 'no source with an unknown licence is marked verified');
